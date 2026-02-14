@@ -1,0 +1,20 @@
+# Python/虚拟环境
+.venv/
+__pycache__/
+*.pyc
+
+# 密钥与私密配置
+secret.txt
+
+# 运行产物/索引/缓存
+rag_app/vector_db/
+rag_app/data/chunks/
+rag_app/data/chunks/chunks.json
+
+# 日志
+rag_app/logs/
+
+
+# 可选：临时文件
+*.tmp
+*.log
