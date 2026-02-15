@@ -13,6 +13,11 @@ BASE_URL = "https://api2.gptsapi.net/v1"
 CHAT_MODEL = "gpt-4o-mini"
 EMBEDDING_MODEL = "text-embedding-3-large"
 
+CHUNK_SIZE = 400
+CHUNK_OVERLAP = 80
+TOP_K = 5
+MAX_CONTEXT_CHARS = 1500
+
 
 def get_client():
     return OpenAI(
