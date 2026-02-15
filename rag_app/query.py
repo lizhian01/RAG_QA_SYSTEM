@@ -2,7 +2,7 @@
 import chromadb
 from chromadb.config import Settings
 
-from config import EMBEDDING_MODEL, VECTOR_DB_DIR, CHAT_MODEL, get_client
+from config import EMBEDDING_MODEL, VECTOR_DB_DIR, CHAT_MODEL, get_client, TOP_K, MAX_CONTEXT_CHARS
 from prompts import SYSTEM_PROMPT, QA_PROMPT_TEMPLATE
 
 COLLECTION_NAME = "tcm_rag"
@@ -13,17 +13,37 @@ def build_prompt(contexts, query):
     return QA_PROMPT_TEMPLATE.format(context_str=context_str, query_str=query)
 
 
+def trim_contexts(contexts, max_chars: int):
+    if max_chars <= 0:
+        return contexts
+    selected = []
+    total = 0
+    for c in contexts:
+        if total >= max_chars:
+            break
+        remaining = max_chars - total
+        if len(c) > remaining:
+            c = c[:remaining]
+        selected.append(c)
+        total += len(c)
+    return selected
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", required=True)
-    parser.add_argument("--top_k", type=int, default=5)
+    parser.add_argument("--top_k", type=int, default=TOP_K)
+    parser.add_argument("--max_context_chars", type=int, default=MAX_CONTEXT_CHARS)
     args = parser.parse_args()
 
     client = get_client()
 
     chroma = chromadb.PersistentClient(
         path=str(VECTOR_DB_DIR),
-        settings=Settings(anonymized_telemetry=False)
+        settings=Settings(
+            anonymized_telemetry=False,
+            chroma_product_telemetry_impl="telemetry_noop.NoopTelemetry",
+        ),
     )
     collection = chroma.get_collection(name=COLLECTION_NAME)
 
@@ -38,6 +58,7 @@ def main() -> None:
     )
 
     contexts = results["documents"][0] if results.get("documents") else []
+    contexts = trim_contexts(contexts, args.max_context_chars)
     prompt = build_prompt(contexts, args.query)
 
     resp = client.chat.completions.create(

@@ -10,4 +10,4 @@ pip install -r "$ROOT\rag_app\requirements.txt"
 
 python "$ROOT\rag_app\scripts\extract_pdf.py"
 python "$ROOT\rag_app\ingest.py"
-python "$ROOT\rag_app\query.py" --query "肾阳虚有什么症状呢？"
+python "$ROOT\rag_app\query.py" --query "如何解除死锁？"
